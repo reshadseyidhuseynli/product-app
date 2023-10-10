@@ -1,7 +1,7 @@
 package com.company.productapp.mapper;
 
-import com.company.productapp.dto.request.ProductRequestDto;
-import com.company.productapp.dto.response.ProductResponseDto;
+import com.company.productapp.dto.request.ProductRequest;
+import com.company.productapp.dto.response.ProductResponse;
 import com.company.productapp.domain.Product;
 import org.mapstruct.*;
 
@@ -13,14 +13,14 @@ import java.util.List;
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProductMapper {
 
-    Product toProduct(ProductRequestDto productRequestDto);
+    Product toProduct(ProductRequest productRequest);
 
     @AfterMapping
     default void mapCreatedDate(@MappingTarget Product product) {
         product.setCreatedDate(LocalDate.now());
     }
 
-    ProductResponseDto toProductResponseDto(Product product);
+    ProductResponse toProductResponseDto(Product product);
 
-    List<ProductResponseDto> toProductResponseDtoList(List<Product> products);
+    List<ProductResponse> toProductResponseDtoList(List<Product> products);
 }

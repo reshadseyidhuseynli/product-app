@@ -1,7 +1,7 @@
 package com.company.productapp.controller;
 
-import com.company.productapp.dto.request.ProductRequestDto;
-import com.company.productapp.dto.response.ProductResponseDto;
+import com.company.productapp.dto.request.ProductRequest;
+import com.company.productapp.dto.response.ProductResponse;
 import com.company.productapp.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -20,23 +20,28 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public List<ProductResponseDto> getAll() {
+    public List<ProductResponse> getAll() {
         return productService.getAll();
     }
 
     @GetMapping("/{id}")
-    public ProductResponseDto getById(@Min(1) @PathVariable("id") Integer id) {
+    public ProductResponse getById(@Min(1) @PathVariable("id") Integer id) {
         return productService.getById(id);
     }
 
     @PostMapping
-    public void add(@Valid @RequestBody ProductRequestDto product) {
+    public void add(@Valid @RequestBody ProductRequest product) {
         productService.add(product);
     }
 
-    @PutMapping("/{id}")
-    public void updateProduct(@PathVariable("id") Integer id,
-                              @Valid @RequestBody ProductRequestDto product) {
+    @PutMapping()
+    public void updateProduct(@RequestParam("id") Integer id,
+                              @Valid @RequestBody ProductRequest product) {
         productService.update(id, product);
+    }
+
+    @DeleteMapping()
+    public void deleteProduct(@RequestParam("id") Integer id) {
+        productService.delete(id);
     }
 }

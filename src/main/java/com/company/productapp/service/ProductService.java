@@ -1,26 +1,26 @@
 package com.company.productapp.service;
 
-import com.company.productapp.dto.request.ProductRequestDto;
-import com.company.productapp.dto.response.ProductResponseDto;
 import com.company.productapp.domain.Product;
+import com.company.productapp.dto.request.ProductRequest;
+import com.company.productapp.dto.response.ProductResponse;
 import com.company.productapp.error.model.ProductNotFoundException;
 import com.company.productapp.mapper.ProductMapper;
+import com.company.productapp.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
-    private static final Map<Integer, Product> mapByProductId = new HashMap<>();
-
+    private final ProductRepository repo;
     private final ProductMapper productMapper;
 
-    public ProductResponseDto getById(Integer id) {
-        Product product = mapByProductId.get(id);
+    public ProductResponse getById(Integer id) {
+        final Product product = repo.getById(id);
 
         if (Objects.isNull(product)) {
             throw new ProductNotFoundException("Product was not found with given id: " + id);
@@ -29,23 +29,20 @@ public class ProductService {
         return productMapper.toProductResponseDto(product);
     }
 
-    public List<ProductResponseDto> getAll() {
-        List<Product> products = new ArrayList<>(mapByProductId.values());
-        return productMapper.toProductResponseDtoList(products);
+    public List<ProductResponse> getAll() {
+        return productMapper.toProductResponseDtoList(repo.getAll());
     }
 
-    public void add(ProductRequestDto productRequestDto) {
-        Product product = productMapper.toProduct(productRequestDto);
-        int mapSize = mapByProductId.keySet().size();
-        mapByProductId.put(mapSize + 1, product);
+    public void add(ProductRequest productRequest) {
+        Product product = productMapper.toProduct(productRequest);
+        repo.add(product);
     }
 
-    public void update(Integer id, ProductRequestDto productRequestDto) {
-        Product product = mapByProductId.get(id);
-        product.setName(productRequestDto.getName());
-        product.setPrice(productRequestDto.getPrice());
-        product.setUpdatedDate(LocalDate.now());
-        mapByProductId.put(id, product);
+    public void update(Integer id, ProductRequest productRequest) {
+        repo.update(id, productMapper.toProduct(productRequest));
     }
 
+    public void delete(Integer id) {
+        repo.delete(id);
+    }
 }
