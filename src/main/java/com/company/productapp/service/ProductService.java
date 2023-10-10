@@ -20,7 +20,7 @@ public class ProductService {
     private final ProductMapper productMapper;
 
     public ProductResponse getById(Integer id) {
-        final Product product = repo.getById(id);
+        Product product = repo.getById(id);
 
         if (Objects.isNull(product)) {
             throw new ProductNotFoundException("Product was not found with given id: " + id);

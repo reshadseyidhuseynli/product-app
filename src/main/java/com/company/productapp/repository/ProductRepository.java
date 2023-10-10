@@ -14,10 +14,7 @@ public class ProductRepository {
     private static Integer lastId;
 
     private static Integer getNextId() {
-        if (Objects.isNull(lastId))
-            lastId = 1;
-        else lastId++;
-        return lastId;
+        return Objects.isNull(lastId) ? lastId = 1 : ++lastId;
     }
 
     public Product getById(Integer id) {
