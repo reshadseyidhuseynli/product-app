@@ -17,7 +17,8 @@ public interface ProductMapper {
 
     @AfterMapping
     default void mapCreatedDate(@MappingTarget Product product) {
-        product.setCreatedDate(LocalDate.now());
+        product.setCreatedAt(LocalDate.now());
+        product.setUpdatedAt(LocalDate.now());
     }
 
     ProductResponse toProductResponseDto(Product product);

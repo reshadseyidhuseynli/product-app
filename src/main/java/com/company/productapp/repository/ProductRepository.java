@@ -1,52 +1,78 @@
 package com.company.productapp.repository;
 
 import com.company.productapp.domain.Product;
-import com.company.productapp.error.model.ProductNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @Repository
+@RequiredArgsConstructor
 public class ProductRepository {
 
-    private static final Map<Integer, Product> products = new HashMap<>();
-    private static Integer lastId;
-
-    private static Integer getNextId() {
-        return Objects.isNull(lastId) ? lastId = 1 : ++lastId;
-    }
+    private final NamedParameterJdbcTemplate jdbc;
+    private final RowMapper<Product> productRowMapper;
 
     public Product getById(Integer id) {
-        Product product = products.get(id);
+        String sql = "SELECT * FROM product WHERE id = :id";
 
-        if (Objects.isNull(product)) {
-            throw new ProductNotFoundException("Product was not found with given id: " + id);
-        }
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", id);
 
-        return product;
+        return jdbc.queryForObject(
+                sql,
+                params,
+                productRowMapper
+        );
     }
 
     public List<Product> getAll() {
-        return new ArrayList<>(products.values());
+        String sql = "SELECT * FROM product";
+
+        return jdbc.query(
+                sql,
+                productRowMapper
+        );
     }
 
     public void add(Product product) {
-        products.put(getNextId(), product);
+        String sql = "INSERT INTO product (name, price, created_at) VALUES (:name, :price,:created_at)";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", product.getName());
+        params.addValue("price", product.getPrice());
+        params.addValue("created_at", Date.valueOf(LocalDate.now()));
+
+        jdbc.update(sql, params, new GeneratedKeyHolder());
     }
 
-    public void update(Integer id, Product newProduct) {
-        Product product = products.get(id);
-        product.setName(newProduct.getName());
-        product.setPrice(newProduct.getPrice());
-        product.setUpdatedDate(LocalDate.now());
+    public void update(Integer id,Product product) {
+        String sql = "UPDATE product SET name = :name, price = :price, updated_at = :updated_at WHERE id = :id";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", product.getName());
+        params.addValue("price", product.getPrice());
+        params.addValue("updated_at", Date.valueOf(LocalDate.now()));
+        params.addValue("id", id);
+
+        jdbc.update(sql,params);
     }
 
     public void delete(Integer id) {
-        Product product = products.remove(id);
+        String sql = "DELETE FROM product WHERE id = :id";
 
-        if (Objects.isNull(product)) {
-            throw new ProductNotFoundException("Product was not found with given id: " + id);
-        }
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", id);
+
+        jdbc.update(sql,params);
     }
 }
